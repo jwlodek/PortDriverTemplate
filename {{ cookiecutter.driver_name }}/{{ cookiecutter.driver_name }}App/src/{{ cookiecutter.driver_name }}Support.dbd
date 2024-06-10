@@ -1,0 +1,1 @@
+registrar("{{ cookiecutter.driver_name }}Register")

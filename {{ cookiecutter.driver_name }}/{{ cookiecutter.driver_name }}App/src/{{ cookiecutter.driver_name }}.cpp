@@ -201,7 +201,7 @@ static const iocshArg* const {{ cookiecutter.driver_name }}ConfigArgs[] = {&{{ c
 
 /* what function to call at config */
 static void config{{ cookiecutter.driver_name }}CallFunc(const iocshArgBuf* args) {
-    {{ cookiecutter.driver_name }}Config(args[0]);
+    {{ cookiecutter.driver_name }}Config(args[0].sval);
 }
 
 /* information about the configuration function */

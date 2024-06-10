@@ -9,7 +9,7 @@ dbLoadDatabase("$(TOP)/dbd/{{ cookiecutter.driver_name }}App.dbd")
 
 # Define asyn port name
 epicsEnvSet("PORT", "DRV1")
-epicsEnvSet("PREFIX", "{{ pv_prefix }}")
+epicsEnvSet("PREFIX", "{{ cookiecutter.pv_prefix }}")
 
 {{ cookiecutter.driver_name }}Config("$(PORT)")
 

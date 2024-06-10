@@ -1,5 +1,6 @@
 {
     "author": "Controls Engineer",
     "driver_name": "MyNewDriver",
-    "institution": "Brookhaven National Laboratory"
+    "institution": "Brookhaven National Laboratory",
+    "pv_prefix": "DEV:SB1:"
 }

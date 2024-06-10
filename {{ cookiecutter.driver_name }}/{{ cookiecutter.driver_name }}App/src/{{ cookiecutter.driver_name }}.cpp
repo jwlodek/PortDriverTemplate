@@ -22,6 +22,8 @@
 #include <epicsTime.h>
 #include <iocsh.h>
 
+#include "{{ cookiecutter.driver_name }}.hpp"
+
 
 // Error message formatters
 #define ERR(msg)                                                                                 \
@@ -199,7 +201,7 @@ static const iocshArg* const {{ cookiecutter.driver_name }}ConfigArgs[] = {&{{ c
 
 /* what function to call at config */
 static void config{{ cookiecutter.driver_name }}CallFunc(const iocshArgBuf* args) {
-    {{ cookiecutter.driver_name }}Config(args[0].);
+    {{ cookiecutter.driver_name }}Config(args[0]);
 }
 
 /* information about the configuration function */

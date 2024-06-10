@@ -101,8 +101,7 @@ asynStatus {{ cookiecutter.driver_name }}::writeInt32(asynUser* pasynUser, epics
     }
 
     if (status) {
-        ERR_ARGS("ERROR status=%d, function=%d, value=%d, msg=%s", status, function, value,
-                 getErrorString(this->errorCode));
+        ERR_ARGS("ERROR status=%d, function=%d, value=%d", status, function, value);
         return asynError;
     } else {  // Don't log period checkStatus PV processing
         status = setIntegerParam(function, value);
@@ -130,8 +129,7 @@ asynStatus {{ cookiecutter.driver_name }}::writeFloat64(asynUser* pasynUser, epi
     }
 
     if (status) {
-        ERR_ARGS("ERROR status=%d, function=%d, value=%f, msg=%s", status, function, value,
-                 getErrorString(this->errorCode));
+        ERR_ARGS("ERROR status=%d, function=%d, value=%f", status, function, value);
     } else {
         status = setDoubleParam(function, value);
         LOG_ARGS("function=%d value=%f", function, value);

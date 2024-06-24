@@ -41,6 +41,8 @@ private:
 
 {% if cookiecutter.use_tcp_port %}
     asynUser* pasynUserTCPPort;
+
+    asynStatus writeReadSocket(const char* cmd, char* resp, size_t maxChars, double timeout);
 {% endif %}
 
 };

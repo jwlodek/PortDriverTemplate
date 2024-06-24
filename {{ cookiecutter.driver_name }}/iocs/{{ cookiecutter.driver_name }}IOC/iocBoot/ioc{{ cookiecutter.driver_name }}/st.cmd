@@ -11,8 +11,18 @@ dbLoadDatabase("$(TOP)/dbd/{{ cookiecutter.driver_name }}App.dbd")
 epicsEnvSet("PORT", "DRV1")
 epicsEnvSet("PREFIX", "{{ cookiecutter.pv_prefix }}")
 
-{{ cookiecutter.driver_name }}Config("$(PORT)")
+{% if cookiecutter.use_tcp_port %}
+epicsEnvSet("IP_PORT", "IP_PORT")
+drvAsynIpPortConfigure("$(IP_PORT)", "127.0.0.1:8888")
+asynOctetSetOutputEos("$(IP_PORT)", 0, "\n")
+asynOctetSetInputEos("$(IP_PORT)", 0, "\n")
+{% endif %}
 
+{% if cookiecutter.use_tcp_port %}
+{{ cookiecutter.driver_name }}Config("$(PORT)", "$(IP_PORT)")
+{% else %}
+{{ cookiecutter.driver_name }}Config("$(PORT)")
+{% endif %}
 
 #asynSetTraceMask("$(PORT)", -1, 0x0)
 #asynSetTraceMask("$(PORT)", -1, 0x1)

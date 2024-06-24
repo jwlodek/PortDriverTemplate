@@ -11,7 +11,7 @@
 
 
 // Defines of strings that map Params to Records
-#define {{ cookiecutter.driver_name }}VersionString "{{ cookiecutter.driver_name.upper() }}_VERSION"
+#define {{ cookiecutter.driver_name }}_VersionString "{{ cookiecutter.driver_name.upper() }}_VERSION"
 
 
 class {{ cookiecutter.driver_name }} : public asynPortDriver {
@@ -34,10 +34,15 @@ public:
 protected:
 
 #define FIRST_{{ cookiecutter.driver_name.upper() }}_PARAM {{ cookiecutter.driver_name }}Version
-    int {{ cookiecutter.driver_name }}Version;
+    int {{ cookiecutter.driver_name }}_Version;
 #define LAST_{{ cookiecutter.driver_name.upper() }}_PARAM {{ cookiecutter.driver_name }}Version
 
 private:
+
+{% if cookiecutter.use_tcp_port %}
+    asynUser* pasynUserTCPPort;
+{% endif %}
+
 };
 
 #define NUM_{{ cookiecutter.driver_name.upper() }}_PARAMS ((int)(&LAST_{{ cookiecutter.driver_name.upper() }}_PARAM - &FIRST_{{ cookiecutter.driver_name.upper() }}_PARAM + 1))

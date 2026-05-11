@@ -25,32 +25,6 @@
 #include "{{ cookiecutter.driver_name }}.hpp"
 
 
-// Error message formatters
-#define ERR(msg)                                                                                 \
-    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR, "ERROR | %s::%s: %s\n", driverName, functionName, \
-              msg)
-
-#define ERR_ARGS(fmt, ...)                                                              \
-    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR, "ERROR | %s::%s: " fmt "\n", driverName, \
-              functionName, __VA_ARGS__);
-
-// Warning message formatters
-#define WARN(msg) \
-    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR, "WARN | %s::%s: %s\n", driverName, functionName, msg)
-
-#define WARN_ARGS(fmt, ...)                                                            \
-    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR, "WARN | %s::%s: " fmt "\n", driverName, \
-              functionName, __VA_ARGS__);
-
-// Log message formatters
-#define LOG(msg) \
-    asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s::%s: %s\n", driverName, functionName, msg)
-
-#define LOG_ARGS(fmt, ...)                                                                       \
-    asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s::%s: " fmt "\n", driverName, functionName, \
-              __VA_ARGS__);
-
-
 using namespace std;
 
 const char* driverName = "{{ cookiecutter.driver_name }}";
@@ -67,16 +41,15 @@ const char* driverName = "{{ cookiecutter.driver_name }}";
  *
  * @param portName Asyn port name for the {{ cookiecutter.driver_name }} object instance.
 {% if cookiecutter.use_tcp_port %}
- * @param tcpPortName Asyn port name for the TCP socket opened with drvAsynIpPortConfigure
  * @return asynSuccess
  */
-extern "C" int {{ cookiecutter.driver_name }}Config(const char* portName, const char* tcpPortName) {
+extern "C" int {{ cookiecutter.driver_name }}Config(const char* portName) {
     new {{ cookiecutter.driver_name }}(portName);
 {% else %}
  * @return asynSuccess
  */
 extern "C" int {{ cookiecutter.driver_name }}Config(const char* portName) {
-    new {{ cookiecutter.driver_name }}(portName, tcpPortName);
+    new {{ cookiecutter.driver_name }}(portName);
 {% endif %}
     return (asynSuccess);
 }
@@ -192,13 +165,8 @@ void {{ cookiecutter.driver_name }}::report(FILE* fp, int details) {
  * {{ cookiecutter.driver_name }}Config, called at IOC startup.
  * 
  * @param portName Asyn port name for the {{ cookiecutter.driver_name }} object instance.
-{% if cookiecutter.use_tcp_port %}
- * @param tcpPortName Asyn port name for the TCP socket opened with drvAsynIpPortConfigure
-{{ cookiecutter.driver_name }}::{{ cookiecutter.driver_name }}(const char* portName, const char* tcpPortName)
-{% else %}
  */
 {{ cookiecutter.driver_name }}::{{ cookiecutter.driver_name }}(const char* portName)
-{% endif %}
     : asynPortDriver(
           portName, 1, /* maxAddr */
           (int)NUM_{{ cookiecutter.driver_name.upper() }}_PARAMS,
@@ -211,16 +179,15 @@ void {{ cookiecutter.driver_name }}::report(FILE* fp, int details) {
           0, /* Default priority */
           0) /* Default stack size*/
 {
-    static const char* functionName = "{{ cookiecutter.driver_name }}";
-
-    // Create any driver specific parameters
-    createParam({{ cookiecutter.driver_name }}_VersionString, asynParamOctet, &{{ cookiecutter.driver_name }}_Version);
+    this->createAllParams();
 
 {% if cookiecutter.use_tcp_port %}
-    // Connect to the TCP port configured at IOC startup
+    // Connect to the TCP port configured at IOC startup. Pass in asyn port name from
+    // drvAsynIpPortConfigure, and save the asynUser for later use in writeReadSocket
+    LOG_ARGS("Connecting to TCP socket %s...", tcpPortName);
     pasynOctetSyncIO->connect(tcpPortName, 0, &this->pasynUserTCPPort, NULL);
-
 {% endif %}
+
     // When epics is exited, delete the instance of this class
     epicsAtExit(exitCallbackC, (void*)this);
 }
@@ -242,18 +209,10 @@ void {{ cookiecutter.driver_name }}::report(FILE* fp, int details) {
 
 /* {{ cookiecutter.driver_name }}Config -> These are the args passed to the constructor in the epics config function */
 static const iocshArg {{ cookiecutter.driver_name }}ConfigArg0 = {"portName", iocshArgString};
-{% if cookiecutter.use_tcp_port %}
-static const iocshArg {{ cookiecutter.driver_name }}ConfigArg1 = {"tcpPortName", iocshArgString};
-{% endif %}
 
 
 /* Array of config args */
-{% if cookiecutter.use_tcp_port %}
 static const iocshArg* const {{ cookiecutter.driver_name }}ConfigArgs[] = {&{{ cookiecutter.driver_name }}ConfigArg0};
-{% else %}
-static const iocshArg* const {{ cookiecutter.driver_name }}ConfigArgs[] = {&{{ cookiecutter.driver_name }}ConfigArg0,
-                                                    &{{ cookiecutter.driver_name }}ConfigArg1};
-{% endif %}
 
 /**
  * @brief Call function pointer for IOC shell.
@@ -261,15 +220,11 @@ static const iocshArg* const {{ cookiecutter.driver_name }}ConfigArgs[] = {&{{ c
  * @param args Array of IOC shell arguments parsed during IOC startup
  */
 static void config{{ cookiecutter.driver_name }}CallFunc(const iocshArgBuf* args) {
-    {% if cookiecutter.use_tcp_port %}
     {{ cookiecutter.driver_name }}Config(args[0].sval);
-    {% else %}
-    {{ cookiecutter.driver_name }}Config(args[0].sval, args[1].sval);
-    {% endif %}
 }
 
 /* information about the configuration function */
-static const iocshFuncDef config{{ cookiecutter.driver_name }} = {"{{ cookiecutter.driver_name }}Config", {% if cookiecutter.use_tcp_port %}2{% else %}1{% endif %}, {{ cookiecutter.driver_name }}ConfigArgs};
+static const iocshFuncDef config{{ cookiecutter.driver_name }} = {"{{ cookiecutter.driver_name }}Config", 1, {{ cookiecutter.driver_name }}ConfigArgs};
 
 /* IOC register function */
 static void {{ cookiecutter.driver_name }}Register(void) { iocshRegister(&config{{ cookiecutter.driver_name }}, config{{ cookiecutter.driver_name }}CallFunc); }

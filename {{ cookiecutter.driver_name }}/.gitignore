@@ -3,3 +3,11 @@ venv/
 envPaths
 *.swp
 .vscode/
+lib/
+bin/
+dbd/
+include/
+db/
+# pixi
+.pixi/*
+!.pixi/config.toml
